@@ -4,11 +4,11 @@
 #define LARGEUR_FENETRE 1200    // Largeur de la  fenetre principale 
 #define HAUTEUR_FENETRE 600     // Hauteur de la fenetre principale
 
-#define LARGEUR_AIRE_DE_VIE 900     // Largeur de l'aire de vie
-#define HAUTEUR_AIRE_DE_VIE 450     // Hauteur de l'aire de vie
+#define LARGEUR_AIRE_DE_VIE 1000     // Largeur de l'aire de vie
+#define HAUTEUR_AIRE_DE_VIE 500     // Hauteur de l'aire de vie
 
-#define POS_X_AIRE_DE_VIE 50   // Position en x de l'aire de vie
-#define POS_Y_AIRE_DE_VIE 100     // Position en y de l'aire de vie
+#define POS_X_AIRE_DE_VIE 20   // Position en x de l'aire de vie
+#define POS_Y_AIRE_DE_VIE 70     // Position en y de l'aire de vie
 
 #define LARGEUR_BOUTON (LARGEUR_FENETRE-LARGEUR_AIRE_DE_VIE)/2   // Largeur des boutons
 #define HAUTEUR_BOUTON HAUTEUR_FENETRE/20   // Hauteur des boutons
@@ -21,6 +21,8 @@
 #define POS_Y_BOUTON_QUITTER 0.8*HAUTEUR_AIRE_DE_VIE+POS_Y_AIRE_DE_VIE     // Position en y du bouton quitter
 #define POS_X_BOUTON_RESET POS_X_AIRE_DE_VIE+LARGEUR_AIRE_DE_VIE+(LARGEUR_FENETRE-(POS_X_AIRE_DE_VIE+LARGEUR_AIRE_DE_VIE)-LARGEUR_BOUTON)/2  // Position en x du bouton reset
 #define POS_Y_BOUTON_RESET 0.2*HAUTEUR_AIRE_DE_VIE+POS_Y_AIRE_DE_VIE     // Position en y du bouton reset
+
+#define POS_Y_TEXTE_TITRE 20
 
 #define BLANC SDL_MapRGB(ecran->format, 255, 255, 255)
 #define NOIR SDL_MapRGB(ecran->format, 0, 0, 0)
