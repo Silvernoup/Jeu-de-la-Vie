@@ -1,12 +1,22 @@
 #ifndef DEF_CONSTANTES
 #define DEF_CONSTANTES
 
+enum {VIVANTE, MORTE};
+
 #define LARGEUR_FENETRE 1200    // Largeur de la  fenetre principale 
 #define HAUTEUR_FENETRE 600     // Hauteur de la fenetre principale
 
-#define LARGEUR_AIRE_DE_VIE 1000     // Largeur de l'aire de vie
-#define HAUTEUR_AIRE_DE_VIE 500     // Hauteur de l'aire de vie
+#define TAILLE_MEMBRANE 1   // Taille de la membrane séparant chaque cellule
+#define COTE_CELLULE_IDEAL 20   // Distance entre le centre de 2 cellules consécutives
+#define COTE_CELLULE COTE_CELLULE_IDEAL-TAILLE_MEMBRANE     // Taille d'une cellule 
 
+#define LARGEUR_AIRE_DE_VIE 1000 + TAILLE_MEMBRANE     // Largeur de l'aire de vie - J'ajoute une fois taille_membrane car on a N cellules et N+1 cotes
+#define HAUTEUR_AIRE_DE_VIE 500 + TAILLE_MEMBRANE    // Hauteur de l'aire de vie
+
+#define NOMBRE_CELLULE_LARGEUR (LARGEUR_AIRE_DE_VIE-TAILLE_MEMBRANE)/COTE_CELLULE_IDEAL  // Nombre de cellule sur une ligne de l'aire de vie
+#define NOMBRE_CELLULE_HAUTEUR (HAUTEUR_AIRE_DE_VIE-TAILLE_MEMBRANE)/COTE_CELLULE_IDEAL   // Nombre de cellule sur une colonne de l'aire de vie
+#define NOMBRE_CELLULE_LARGEUR_TOTAL NOMBRE_CELLULE_LARGEUR + 100
+#define NOMBRE_CELLULE_HAUTEUR_TOTAL NOMBRE_CELLULE_HAUTEUR + 100
 #define POS_X_AIRE_DE_VIE 20   // Position en x de l'aire de vie
 #define POS_Y_AIRE_DE_VIE 70     // Position en y de l'aire de vie
 
@@ -30,5 +40,7 @@
 #define GRIS_FONCE SDL_MapRGB(ecran->format, 39,40,34)
 #define GRIS SDL_MapRGB(ecran->format, 66, 66, 66)
 
+#define COULEUR_CELLULE_VIVANTE NOIR
+#define COULEUR_CELLULE_MORTE BLANC
 
 #endif

@@ -11,7 +11,8 @@ void editeur(SDL_Surface *ecran)
     TTF_Init();
     TTF_Font *police = TTF_OpenFont("Ubuntu-C.ttf",17);
     TTF_Font *policeTitre = TTF_OpenFont("Ubuntu-C.ttf",30);
-
+    SDL_Surface *cellules[NOMBRE_CELLULE_HAUTEUR][NOMBRE_CELLULE_LARGEUR] = {NULL};
+    initAdv(cellules);
 
     // surfaces
             // area of life
@@ -27,6 +28,10 @@ void editeur(SDL_Surface *ecran)
     SDL_Surface *texteReset = NULL;
     SDL_Surface *texteQuitter = NULL;
     SDL_Surface *texteTitre = NULL;
+
+    int cellulesEtat[NOMBRE_CELLULE_HAUTEUR_TOTAL][NOMBRE_CELLULE_LARGEUR_TOTAL] = {MORTE};
+    int cellulesEtatSuivant[NOMBRE_CELLULE_HAUTEUR_TOTAL][NOMBRE_CELLULE_LARGEUR_TOTAL] = {MORTE};
+
 
     SDL_Color couleurBlanche = {255, 255, 255};
 
@@ -81,8 +86,6 @@ void editeur(SDL_Surface *ecran)
     SDL_FillRect(boutonQuitter, NULL, GRIS);
     SDL_FillRect(boutonReset, NULL, GRIS);
 
-
-
     SDL_BlitSurface(aireDeVie, NULL, ecran, &posAireDeVie);
     SDL_BlitSurface(boutonJouer, NULL, ecran, &posBoutonJouer);
     SDL_BlitSurface(boutonStop, NULL, ecran, &posBoutonStop);
@@ -96,11 +99,16 @@ void editeur(SDL_Surface *ecran)
     SDL_Event event;
     int continuer = 1;
 
+    initCelluleEtat(cellulesEtat);
+    majAdv(ecran, cellules, cellulesEtat);
     while (continuer)
     {
         SDL_WaitEvent(&event);
         switch (event.type)
         {
+            int clickX = 0;
+            int clickY = 0;
+
             case SDL_QUIT:
                 continuer = 0;
                 break;
@@ -111,15 +119,50 @@ void editeur(SDL_Surface *ecran)
                     case SDLK_ESCAPE:
                         continuer = 0;
                         break;
+                    case SDLK_SPACE:
+                        break;
+                }
+                break;
+
+            case SDL_MOUSEBUTTONUP:
+                clickY = event.button.y;
+                clickX = event.button.x;
+                if (clickX >= POS_X_AIRE_DE_VIE && clickX <= POS_X_AIRE_DE_VIE+LARGEUR_AIRE_DE_VIE && clickY >= POS_Y_AIRE_DE_VIE && clickY <= POS_Y_AIRE_DE_VIE+HAUTEUR_AIRE_DE_VIE)
+                {
+
+                    int cellX = 0;
+                    cellX = ((clickX-POS_X_AIRE_DE_VIE) - ((clickX-POS_X_AIRE_DE_VIE) % COTE_CELLULE_IDEAL)) / COTE_CELLULE_IDEAL;
+                    int cellY = 0;
+                    cellY = ((clickY-POS_Y_AIRE_DE_VIE) - ((clickY-POS_Y_AIRE_DE_VIE) % COTE_CELLULE_IDEAL)) / COTE_CELLULE_IDEAL;
+                    if (cellulesEtat[cellY+50][cellX+50] == MORTE) 
+                    {
+                        cellulesEtat[cellY+50][cellX+50] = VIVANTE;
+                    }
+                    else  
+                    {
+                        cellulesEtat[cellY+50][cellX+50] = MORTE;
+                    }
+                }
+
+                if (clickX >= POS_X_BOUTON_QUITTER && clickX <= POS_X_BOUTON_QUITTER + LARGEUR_BOUTON && clickY >= POS_Y_BOUTON_QUITTER && clickY <= POS_Y_BOUTON_QUITTER + HAUTEUR_BOUTON)
+                {
+                    continuer = 0;
+                }
+
+                if (clickX > POS_X_BOUTON_RESET && clickX < POS_X_BOUTON_RESET + LARGEUR_BOUTON && clickY > POS_Y_BOUTON_RESET && clickY < POS_Y_BOUTON_RESET + HAUTEUR_BOUTON)
+                {
+                    initCelluleEtat(cellulesEtat);
                 }
                 break;
         }
+        majAdv(ecran, cellules, cellulesEtat);
         SDL_Flip(ecran);
 
     }
 
 
     TTF_CloseFont(police);
+    TTF_CloseFont(policeTitre);
     TTF_Quit();
 
     SDL_FreeSurface(boutonJouer);
@@ -131,6 +174,162 @@ void editeur(SDL_Surface *ecran)
     SDL_FreeSurface(texteQuitter);
     SDL_FreeSurface(texteStop);
     SDL_FreeSurface(texteReset);
+    SDL_FreeSurface(texteTitre);
+    int i = 0;
+    int j = 0;
+    for (i = 0; i < NOMBRE_CELLULE_HAUTEUR; i++)
+    {
+        for (j = 0; j < NOMBRE_CELLULE_LARGEUR; j++)
+        {
+            SDL_FreeSurface(cellules[i][j]); // Libère une surface
+        }
+    }
+
 }
 
 
+void evolution (SDL_Surface *ecran, SDL_Surface *cellules[][NOMBRE_CELLULE_LARGEUR], int cellulesEtatSuivant[][NOMBRE_CELLULE_LARGEUR_TOTAL],int cellulesEtat[][NOMBRE_CELLULE_LARGEUR_TOTAL])
+{
+    appliquerRegles (cellulesEtat, cellulesEtatSuivant);
+    majAdv(ecran, cellules, cellulesEtat);
+}
+
+void appliquerRegles(int cellulesEtat[][NOMBRE_CELLULE_LARGEUR_TOTAL], int cellulesEtatSuivant[][NOMBRE_CELLULE_LARGEUR_TOTAL])
+{
+    int i = 0;
+    int j = 0;
+
+    for (i = 1; i < NOMBRE_CELLULE_HAUTEUR_TOTAL - 1; i++)      // j'enlève les valeurs extremes pour ne pas gérer l'absence de cellules
+    {
+        for (j = 1; j < NOMBRE_CELLULE_LARGEUR_TOTAL - 1; j++)
+        {
+            int compteurVoisineVivante = 0;
+
+            if (cellulesEtat[i - 1][j - 1] == VIVANTE)
+                {
+                    compteurVoisineVivante += 1;
+                }
+            if (cellulesEtat[i - 1][j] == VIVANTE)
+                {                
+                    compteurVoisineVivante += 1;
+                }
+            if (cellulesEtat[i - 1][j + 1] == VIVANTE)
+                {
+                    compteurVoisineVivante += 1;
+                }
+            if (cellulesEtat[i][j - 1] == VIVANTE)
+                {
+                    compteurVoisineVivante += 1;
+                }
+            if (cellulesEtat[i][j + 1] == VIVANTE)
+                {
+                    compteurVoisineVivante += 1;
+                }
+            if (cellulesEtat[i + 1][j - 1] == VIVANTE)
+                {
+                    compteurVoisineVivante += 1;
+                }
+            if (cellulesEtat[i + 1][j] == VIVANTE)
+                {
+                    compteurVoisineVivante += 1;
+                }
+            if (cellulesEtat[i + 1][j + 1] == VIVANTE)
+                {
+                    compteurVoisineVivante += 1;
+                }
+
+            if (compteurVoisineVivante < 2 || compteurVoisineVivante > 3)
+                {
+                    cellulesEtatSuivant[i][j] = MORTE;
+                }
+            if (compteurVoisineVivante == 3)
+                {
+                    cellulesEtatSuivant[i][j] = VIVANTE;
+                }
+            if (compteurVoisineVivante == 2)
+                {
+                     cellulesEtatSuivant[i][j] = cellulesEtat[i][j];
+                }
+
+           // if (cellulesEtat[i][j] == cellulesEtatSuivant[i][j])    // Pour gérer la fin de l'évolution (stable)
+           //     compteurFinEvolution++;
+           cellulesEtat[i][j] = cellulesEtatSuivant[i][j];
+        }
+    }
+
+    for (i = 1; i < NOMBRE_CELLULE_HAUTEUR_TOTAL - 1; i++)      // j'enlève les valeurs extremes pour ne pas gérer l'absence de cellules
+    {
+        for (j = 1; j < NOMBRE_CELLULE_LARGEUR_TOTAL - 1; j++)
+        {
+           cellulesEtat[i][j] = cellulesEtatSuivant[i][j];
+        }
+    } 
+}
+
+void initCelluleEtat(int cellulesEtat[][NOMBRE_CELLULE_LARGEUR_TOTAL])
+{
+    int i = 0;
+    int j = 0;
+    for (i = 0; i < NOMBRE_CELLULE_HAUTEUR_TOTAL; i++)
+    {
+        for (j = 0; j < NOMBRE_CELLULE_LARGEUR_TOTAL; j++)
+        {
+            cellulesEtat[i][j] = MORTE;
+        }
+    }
+}
+
+void majAdv(SDL_Surface *ecran, SDL_Surface *cellules[][NOMBRE_CELLULE_LARGEUR], int cellulesEtat[][NOMBRE_CELLULE_LARGEUR_TOTAL])
+{
+    int i = 0;
+    int j = 0;
+    for (i = 0; i < NOMBRE_CELLULE_HAUTEUR; i++)
+    {
+        for (j = 0; j < NOMBRE_CELLULE_LARGEUR; j++) // -1 car on laisse les cellules externes mortes.
+        {
+            if (cellulesEtat[i+50][j+50] == VIVANTE)
+            {
+                animerCellule(ecran, cellules, i, j);
+            }
+            if (cellulesEtat[i+50][j+50] == MORTE)
+            {
+                tuerCellule(ecran, cellules, i, j);
+            }
+        }
+    }
+}
+
+void animerCellule(SDL_Surface *ecran, SDL_Surface *cellules[][NOMBRE_CELLULE_LARGEUR], int a, int b)
+{
+    SDL_Rect positionCellule;
+    SDL_FillRect(cellules[a][b], NULL, COULEUR_CELLULE_VIVANTE);
+
+    positionCellule.x = POS_X_AIRE_DE_VIE + TAILLE_MEMBRANE + (COTE_CELLULE + TAILLE_MEMBRANE) * b;
+    positionCellule.y = POS_Y_AIRE_DE_VIE + TAILLE_MEMBRANE + (COTE_CELLULE + TAILLE_MEMBRANE) * a;
+
+    SDL_BlitSurface(cellules[a][b], NULL, ecran, &positionCellule);
+}
+
+void tuerCellule(SDL_Surface *ecran, SDL_Surface *cellules[][NOMBRE_CELLULE_LARGEUR], int a, int b)
+{
+    SDL_Rect positionCellule;
+    SDL_FillRect(cellules[a][b], NULL, COULEUR_CELLULE_MORTE);
+
+    positionCellule.x = POS_X_AIRE_DE_VIE + TAILLE_MEMBRANE + (COTE_CELLULE + TAILLE_MEMBRANE) * b;
+    positionCellule.y = POS_Y_AIRE_DE_VIE + TAILLE_MEMBRANE + (COTE_CELLULE + TAILLE_MEMBRANE) * a;
+
+    SDL_BlitSurface(cellules[a][b], NULL, ecran, &positionCellule);
+}
+
+void initAdv(SDL_Surface *cellules[][NOMBRE_CELLULE_LARGEUR])
+{
+    int i = 0;
+    int j = 0;
+    for (i = 0; i < NOMBRE_CELLULE_HAUTEUR; i++)
+    {
+        for (j = 0; j < NOMBRE_CELLULE_LARGEUR; j++)
+        {
+            cellules[i][j] = SDL_CreateRGBSurface(SDL_HWSURFACE, COTE_CELLULE, COTE_CELLULE, 32, 0, 0, 0, 0); // Crée une surface
+        }
+    }
+}
