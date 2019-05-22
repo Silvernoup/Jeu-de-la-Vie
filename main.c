@@ -44,7 +44,7 @@ if (SDL_Init(SDL_INIT_VIDEO) == -1) // Démarrage de la SDL. Si erreur :
     int continuer = 1;
     while (continuer)
     {
-    SDL_Event event;
+        SDL_Event event;
         SDL_WaitEvent(&event);
         switch (event.type)
         {
@@ -63,6 +63,7 @@ if (SDL_Init(SDL_INIT_VIDEO) == -1) // Démarrage de la SDL. Si erreur :
                         continuer = 0;
                         break;
                 }
+                break;
         }
         SDL_Flip(ecran);
     }

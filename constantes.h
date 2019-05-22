@@ -7,8 +7,10 @@ enum {VIVANTE, MORTE};
 #define HAUTEUR_FENETRE 600     // Hauteur de la fenetre principale
 
 #define TAILLE_MEMBRANE 1   // Taille de la membrane séparant chaque cellule
-#define COTE_CELLULE_IDEAL 20   // Distance entre le centre de 2 cellules consécutives
+#define COTE_CELLULE_IDEAL 5   // Distance entre le centre de 2 cellules consécutives
 #define COTE_CELLULE COTE_CELLULE_IDEAL-TAILLE_MEMBRANE     // Taille d'une cellule 
+
+#define PERIODE_GENERATION 40
 
 #define LARGEUR_AIRE_DE_VIE 1000 + TAILLE_MEMBRANE     // Largeur de l'aire de vie - J'ajoute une fois taille_membrane car on a N cellules et N+1 cotes
 #define HAUTEUR_AIRE_DE_VIE 500 + TAILLE_MEMBRANE    // Hauteur de l'aire de vie

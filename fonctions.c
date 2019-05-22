@@ -12,7 +12,6 @@ void editeur(SDL_Surface *ecran)
     TTF_Font *police = TTF_OpenFont("Ubuntu-C.ttf",17);
     TTF_Font *policeTitre = TTF_OpenFont("Ubuntu-C.ttf",30);
     SDL_Surface *cellules[NOMBRE_CELLULE_HAUTEUR][NOMBRE_CELLULE_LARGEUR] = {NULL};
-    initAdv(cellules);
 
     // surfaces
             // area of life
@@ -98,9 +97,8 @@ void editeur(SDL_Surface *ecran)
     SDL_BlitSurface(texteTitre, NULL, ecran, &posTexteTitre);
     SDL_Event event;
     int continuer = 1;
-
+    initAdv(cellules);
     initCelluleEtat(cellulesEtat);
-    majAdv(ecran, cellules, cellulesEtat);
     while (continuer)
     {
         SDL_WaitEvent(&event);
@@ -120,6 +118,7 @@ void editeur(SDL_Surface *ecran)
                         continuer = 0;
                         break;
                     case SDLK_SPACE:
+                        appliquerRegles(cellulesEtat, cellulesEtatSuivant);
                         break;
                 }
                 break;
@@ -134,11 +133,11 @@ void editeur(SDL_Surface *ecran)
                     cellX = ((clickX-POS_X_AIRE_DE_VIE) - ((clickX-POS_X_AIRE_DE_VIE) % COTE_CELLULE_IDEAL)) / COTE_CELLULE_IDEAL;
                     int cellY = 0;
                     cellY = ((clickY-POS_Y_AIRE_DE_VIE) - ((clickY-POS_Y_AIRE_DE_VIE) % COTE_CELLULE_IDEAL)) / COTE_CELLULE_IDEAL;
-                    if (cellulesEtat[cellY+50][cellX+50] == MORTE) 
+                    if (cellulesEtat[cellY+50][cellX+50] == MORTE)
                     {
                         cellulesEtat[cellY+50][cellX+50] = VIVANTE;
                     }
-                    else  
+                    else
                     {
                         cellulesEtat[cellY+50][cellX+50] = MORTE;
                     }
@@ -153,7 +152,52 @@ void editeur(SDL_Surface *ecran)
                 {
                     initCelluleEtat(cellulesEtat);
                 }
+
+                if (clickX > POS_X_BOUTON_JOUER && clickX < POS_X_BOUTON_JOUER + LARGEUR_BOUTON && clickY > POS_Y_BOUTON_JOUER && clickY < POS_Y_BOUTON_JOUER + HAUTEUR_BOUTON)
+                {
+                    int jeuEnCours = 1;
+                    int tempsActuel = 0;
+                    int tempsPrecedent = 0;
+                    while (jeuEnCours)
+                    {
+                        SDL_PollEvent(&event);
+                        switch (event.type)
+                        {
+                            case SDL_KEYDOWN:
+                                switch (event.key.keysym.sym)
+                                {
+                                case SDLK_ESCAPE:
+                                    jeuEnCours = 0;
+                                    break;
+                                }
+                                break;
+                            case SDL_MOUSEBUTTONUP:
+                                clickX = event.button.x;
+                                clickY = event.button.y;
+                                if (clickX > POS_X_BOUTON_STOP && clickX < POS_X_BOUTON_STOP + LARGEUR_BOUTON && clickY > POS_Y_BOUTON_STOP && clickY < POS_Y_BOUTON_STOP + HAUTEUR_BOUTON)
+                                {
+                                    jeuEnCours = 0;
+                                }
+                                break;
+                        }
+                        tempsActuel = SDL_GetTicks();
+                        if (tempsActuel - tempsPrecedent > PERIODE_GENERATION)
+                        {
+                            appliquerRegles(cellulesEtat, cellulesEtatSuivant);
+                            tempsPrecedent = tempsActuel;
+                        }
+                        else
+                        {
+                            SDL_Delay(PERIODE_GENERATION - (tempsActuel - tempsPrecedent));
+                        }
+                        
+                        
+                        majAdv(ecran, cellules, cellulesEtat);
+                        SDL_Flip(ecran);
+                    }
+                }
                 break;
+
         }
         majAdv(ecran, cellules, cellulesEtat);
         SDL_Flip(ecran);
@@ -210,7 +254,7 @@ void appliquerRegles(int cellulesEtat[][NOMBRE_CELLULE_LARGEUR_TOTAL], int cellu
                     compteurVoisineVivante += 1;
                 }
             if (cellulesEtat[i - 1][j] == VIVANTE)
-                {                
+                {
                     compteurVoisineVivante += 1;
                 }
             if (cellulesEtat[i - 1][j + 1] == VIVANTE)
@@ -253,7 +297,6 @@ void appliquerRegles(int cellulesEtat[][NOMBRE_CELLULE_LARGEUR_TOTAL], int cellu
 
            // if (cellulesEtat[i][j] == cellulesEtatSuivant[i][j])    // Pour gérer la fin de l'évolution (stable)
            //     compteurFinEvolution++;
-           cellulesEtat[i][j] = cellulesEtatSuivant[i][j];
         }
     }
 
@@ -263,7 +306,7 @@ void appliquerRegles(int cellulesEtat[][NOMBRE_CELLULE_LARGEUR_TOTAL], int cellu
         {
            cellulesEtat[i][j] = cellulesEtatSuivant[i][j];
         }
-    } 
+    }
 }
 
 void initCelluleEtat(int cellulesEtat[][NOMBRE_CELLULE_LARGEUR_TOTAL])
