@@ -1,6 +1,6 @@
 # Jeu-de-la-Vie
 
-Click on space at first screen to launch the game.
+Press on space at first screen to launch the game.
 
 Click on cells to change their state.
 
